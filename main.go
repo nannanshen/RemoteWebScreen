@@ -26,7 +26,6 @@ import (
 )
 
 //go:embed  index.html static/*
-//go:embed certs/server.key certs/server.pem certs/ca.pem
 var templates embed.FS
 
 func init() {
