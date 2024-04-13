@@ -1,6 +1,6 @@
 module RemoteWebScreen
 
-go 1.20
+go 1.18
 
 require (
 	github.com/atotto/clipboard v0.1.4
@@ -8,7 +8,6 @@ require (
 	github.com/go-vgo/robotgo v0.110.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/kbinani/screenshot v0.0.0-20230812210009-b87d31814237
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 )
 
 require (
