@@ -5,16 +5,18 @@ import (
 	"log"
 	"RemoteWebScreenclient/server"
 	"github.com/gorilla/websocket"
+	"sync"
 )
 
 func main() {
 	dialer := websocket.DefaultDialer
 	dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	c, _, err := dialer.Dial("wss://localhost:9090/clientConnHandler", nil)
+	c, _, err := dialer.Dial("wss://localhost:443/clientConnHandler", nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
 	defer c.Close()
+	var mu sync.Mutex
 
 	go func() {
 		for {
@@ -38,8 +40,9 @@ func main() {
 				server.SimulateDesktopHDMessage(message)
 				response = nil
 			}
-
+			mu.Lock()
 			err = c.WriteMessage(websocket.TextMessage, response)
+			mu.Unlock()
 			if err != nil {
 				log.Println("write:", err)
 				return

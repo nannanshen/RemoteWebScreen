@@ -19,6 +19,8 @@ var upgrader = websocket.Upgrader{
 var wg sync.WaitGroup
 var connections = make(map[*websocket.Conn]bool)
 var mu sync.Mutex
+var mu2 sync.Mutex
+var mu3 sync.Mutex
 
 func ScreenshotHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -51,12 +53,14 @@ func ScreenshotHandler(w http.ResponseWriter, r *http.Request) {
 		for {
 			select {
 			case <-ticker.C:
+				mu2.Lock()
 				err = Clientconn.WriteMessage(websocket.TextMessage, []byte("captureScreen"))
 				if err != nil {
 					log.Println(err)
 					return
 				}
 				_, imgBytes, err := Clientconn.ReadMessage()
+				mu2.Unlock()
 				if err != nil {
 					log.Println(err)
 					return
@@ -94,7 +98,9 @@ func ScreenshotHandler(w http.ResponseWriter, r *http.Request) {
 			case "10":
 				conn.Close()
 			}
+			mu3.Lock()
 			err = Clientconn.WriteMessage(websocket.TextMessage, msg)
+			mu3.Unlock()
 			if err != nil {
 				log.Println(err)
 				return
@@ -111,10 +117,12 @@ func ScreenshotHandler(w http.ResponseWriter, r *http.Request) {
 // 关闭无用连接
 func CleanupConnections() {
 	for conn := range connections {
+		mu.Lock()
 		if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 			conn.Close()
 			delete(connections, conn)
 		}
+		mu.Unlock()
 	}
 }
 
